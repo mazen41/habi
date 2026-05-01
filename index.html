@@ -255,6 +255,41 @@
   }
 
   /* Section styles */
+  @keyframes loaderSlide {
+    0% { left: -100%; }
+    50% { left: 0%; }
+    100% { left: 100%; }
+  }
+  @keyframes sensorPulse {
+    0%, 100% { opacity: 0.3; r: 3; }
+    50% { opacity: 1; r: 5; }
+  }
+  #ps1, #ps2, #ps3, #ps4, #ps5 {
+    animation: sensorPulse 2s ease-in-out infinite;
+  }
+  #ps2 { animation-delay: 0.4s; }
+  #ps3 { animation-delay: 0.8s; }
+  #ps4 { animation-delay: 0.2s; }
+  #ps5 { animation-delay: 0.6s; }
+
+  .bed-spec-row:hover {
+    background: rgba(201,169,110,0.04);
+    padding-left: 8px;
+    transition: all 0.3s;
+  }
+  .bed-spec-row:hover span:last-child {
+    color: var(--gold);
+  }
+
+  .pillow-mode-btn.active {
+    background: rgba(201,169,110,0.15) !important;
+    color: var(--gold) !important;
+  }
+  .pillow-mode-btn:hover:not(.active) {
+    color: var(--text-light) !important;
+    background: rgba(201,169,110,0.05) !important;
+  }
+
   section { position: relative; }
   .section-label {
     font-size: 9px;
@@ -1266,6 +1301,7 @@
   <ul class="nav-links">
     <li><a href="#story">Our Story</a></li>
     <li><a href="#rooms">Rooms</a></li>
+    <li><a href="#room3d">3D Suite</a></li>
     <li><a href="#services">Experiences</a></li>
     <li><a href="#restaurant">Dining</a></li>
     <li><a href="#gallery">Gallery</a></li>
@@ -1508,58 +1544,238 @@
   </div>
 </section>
 
-<!-- MEDICAL PILLOW SECTION -->
-<section id="pillow" style="padding: 0; max-width: 100%;">
-  <div style="max-width:1400px; margin: 0 auto; padding: 140px 80px;">
-    <div class="pillow-grid">
-      <div class="pillow-visual reveal">
-        <span class="section-label" style="display:block; text-align:center; margin-bottom: 24px;">HAPI Sleep Intelligence™</span>
-        <div style="background: var(--dark-elevated); border: 1px solid rgba(201,169,110,0.08); padding: 40px; margin-bottom: 24px;">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
-            <span style="font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted);">Tonight's Profile</span>
-            <span style="width:8px; height:8px; background:#4CAF50; border-radius:50%; display:block; box-shadow: 0 0 8px rgba(76,175,80,0.5);"></span>
-          </div>
-          <div style="font-family:'Cormorant Garamond',serif; font-size:52px; font-weight:300; color:var(--gold); text-align:center; line-height:1; margin-bottom:8px;">96<span style="font-size:20px; color:var(--muted);">%</span></div>
-          <div style="font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); text-align:center;">Sleep Quality Index</div>
+<!-- 3D ROOM EXPERIENCE SECTION -->
+<section id="room3d" style="padding: 0; overflow:hidden; position:relative; background: var(--obsidian);">
+  <!-- Cinematic entrance overlay -->
+  <div id="room3d-veil" style="position:absolute;inset:0;background:var(--obsidian);z-index:20;pointer-events:none;transition:opacity 1.8s ease;"></div>
 
-          <div style="margin-top:28px; display:flex; flex-direction:column; gap:12px;">
-            <div>
-              <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                <span style="font-size:9px; letter-spacing:2px; color:var(--text-muted);">Cervical Alignment</span>
-                <span style="font-size:9px; color:var(--gold);">Optimal</span>
-              </div>
-              <div style="height:2px; background:rgba(201,169,110,0.1); border-radius:2px;">
-                <div style="width:93%; height:100%; background:linear-gradient(to right, var(--gold-dark), var(--gold)); border-radius:2px;"></div>
-              </div>
+  <div style="max-width:1400px; margin:0 auto; padding: 140px 80px 60px; position:relative; z-index:2;">
+    <div class="reveal" style="text-align:center; margin-bottom:80px;">
+      <span class="section-label" style="display:block; text-align:center;">Immersive Experience</span>
+      <h2 class="section-title" style="text-align:center;">Step inside<br><em>your sanctuary</em></h2>
+      <div class="gold-sep"><div class="gold-sep-icon"></div></div>
+      <p class="section-body" style="text-align:center; max-width:600px; margin:0 auto;">Drag to explore. Scroll to enter. This is your room.</p>
+    </div>
+  </div>
+
+  <!-- THREE.JS Canvas Container -->
+  <div id="room3d-container" style="width:100%; height:75vh; position:relative; cursor:grab;">
+    <canvas id="room3d-canvas" style="width:100%;height:100%;display:block;"></canvas>
+    <!-- Loading state -->
+    <div id="room3d-loader" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--obsidian);z-index:10;flex-direction:column;gap:20px;">
+      <div style="width:60px;height:1px;background:var(--gold-dark);position:relative;overflow:hidden;">
+        <div id="loader-bar" style="position:absolute;left:-100%;top:0;width:100%;height:100%;background:var(--gold);animation:loaderSlide 1.4s ease-in-out infinite;"></div>
+      </div>
+      <span style="font-size:8px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);">Preparing your room</span>
+    </div>
+    <!-- Interaction hint -->
+    <div id="room3d-hint" style="position:absolute;bottom:32px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:3px;text-transform:uppercase;color:rgba(201,169,110,0.5);pointer-events:none;transition:opacity 0.8s;">Drag to explore · Scroll to zoom</div>
+  </div>
+
+  <!-- Bed Details Panel -->
+  <div style="max-width:1400px; margin:0 auto; padding: 80px 80px 140px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:start;" class="reveal">
+
+      <div>
+        <span class="section-label">The Royal Bed</span>
+        <h2 class="section-title">Egyptian King<br><em>in repose</em></h2>
+        <div class="gold-sep"><div class="gold-sep-icon"></div></div>
+        <p class="section-body" style="margin-bottom:40px;">The centerpiece of your sanctuary. Every layer engineered for the deepest sleep of your life — wrapped in the finest linen Egypt has ever woven.</p>
+
+        <!-- Bed specs -->
+        <div style="display:flex; flex-direction:column; gap:0;">
+          <div class="bed-spec-row" data-detail="Egyptian hand-loomed from Nile Delta cotton fields" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(201,169,110,0.08);cursor:pointer;">
+            <span style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);">Bedding</span>
+            <span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--cream);">Egyptian Cotton · 1200TC</span>
+          </div>
+          <div class="bed-spec-row" data-detail="Dual-zone climate responds to your body heat within 90 seconds" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(201,169,110,0.08);cursor:pointer;">
+            <span style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);">Temperature</span>
+            <span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--cream);">Dual-Zone Climate Control</span>
+          </div>
+          <div class="bed-spec-row" data-detail="Nine layers: memory foam, latex, and a carbon-fibre support spine" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(201,169,110,0.08);cursor:pointer;">
+            <span style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);">Mattress</span>
+            <span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--cream);">Ultra-Soft Memory Foam + Smart Layer</span>
+          </div>
+          <div class="bed-spec-row" data-detail="Size: 220 × 210 cm. Carved solid alabaster frame, polished by hand" style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(201,169,110,0.08);cursor:pointer;">
+            <span style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);">Frame</span>
+            <span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--cream);">Royal Egyptian King · Alabaster</span>
+          </div>
+        </div>
+
+        <!-- Spec detail tooltip -->
+        <div id="bed-spec-detail" style="margin-top:24px;padding:20px 24px;background:var(--dark-elevated);border-left:2px solid var(--gold);opacity:0;transition:opacity 0.4s;min-height:60px;">
+          <span style="font-size:11px;letter-spacing:1px;color:var(--text-light);font-style:italic;" id="bed-spec-text">Hover a row above to reveal craftsmanship details.</span>
+        </div>
+      </div>
+
+      <!-- Sleep comfort rating -->
+      <div>
+        <span class="section-label">Sleep Comfort Rating</span>
+        <div style="margin:32px 0 40px; display:flex; flex-direction:column; gap:20px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+              <span style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);">Overall Comfort</span>
+              <span style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);">9.8</span>
             </div>
-            <div>
-              <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                <span style="font-size:9px; letter-spacing:2px; color:var(--text-muted);">Temperature Control</span>
-                <span style="font-size:9px; color:var(--gold);">18.5°C</span>
-              </div>
-              <div style="height:2px; background:rgba(201,169,110,0.1); border-radius:2px;">
-                <div style="width:78%; height:100%; background:linear-gradient(to right, var(--gold-dark), var(--gold)); border-radius:2px;"></div>
-              </div>
+            <div style="height:2px;background:rgba(201,169,110,0.1);border-radius:2px;overflow:hidden;">
+              <div class="comfort-bar" data-width="98%" style="height:100%;width:0;background:linear-gradient(to right,var(--gold-dark),var(--gold));border-radius:2px;transition:width 1.8s ease 0.2s;"></div>
             </div>
-            <div>
-              <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                <span style="font-size:9px; letter-spacing:2px; color:var(--text-muted);">REM Phase Enhancement</span>
-                <span style="font-size:9px; color:var(--gold);">Active</span>
-              </div>
-              <div style="height:2px; background:rgba(201,169,110,0.1); border-radius:2px;">
-                <div style="width:88%; height:100%; background:linear-gradient(to right, var(--gold-dark), var(--gold)); border-radius:2px;"></div>
-              </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+              <span style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);">Pressure Relief</span>
+              <span style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);">9.5</span>
+            </div>
+            <div style="height:2px;background:rgba(201,169,110,0.1);border-radius:2px;overflow:hidden;">
+              <div class="comfort-bar" data-width="95%" style="height:100%;width:0;background:linear-gradient(to right,var(--gold-dark),var(--gold));border-radius:2px;transition:width 1.8s ease 0.4s;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+              <span style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);">Temperature Balance</span>
+              <span style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);">9.7</span>
+            </div>
+            <div style="height:2px;background:rgba(201,169,110,0.1);border-radius:2px;overflow:hidden;">
+              <div class="comfort-bar" data-width="97%" style="height:100%;width:0;background:linear-gradient(to right,var(--gold-dark),var(--gold));border-radius:2px;transition:width 1.8s ease 0.6s;"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+              <span style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);">Linens Softness</span>
+              <span style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);">10</span>
+            </div>
+            <div style="height:2px;background:rgba(201,169,110,0.1);border-radius:2px;overflow:hidden;">
+              <div class="comfort-bar" data-width="100%" style="height:100%;width:0;background:linear-gradient(to right,var(--gold-dark),var(--gold));border-radius:2px;transition:width 1.8s ease 0.8s;"></div>
             </div>
           </div>
         </div>
+        <!-- Star rating display -->
+        <div style="display:flex; gap:6px; margin-bottom:24px;" id="bed-stars">
+          <span style="color:var(--gold);font-size:22px;">★</span>
+          <span style="color:var(--gold);font-size:22px;">★</span>
+          <span style="color:var(--gold);font-size:22px;">★</span>
+          <span style="color:var(--gold);font-size:22px;">★</span>
+          <span style="color:var(--gold);font-size:22px;">★</span>
+        </div>
+        <p style="font-size:11px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;">Rated by 2,400+ guests across five continents. The HAPI bed has become a recurring reason guests return.</p>
+        <button class="btn-gold" style="margin-top:32px;" onclick="focusBedIn3D()">Explore Bed in 3D View</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEDICAL PILLOW SECTION (ENHANCED) -->
+<section id="pillow" style="padding: 0; max-width: 100%;">
+  <div style="max-width:1400px; margin: 0 auto; padding: 140px 80px;">
+
+    <!-- Pillow Mode Toggle Header -->
+    <div class="reveal" style="text-align:center; margin-bottom:72px;">
+      <span class="section-label" style="display:block;text-align:center;margin-bottom:16px;">HAPI Sleep Intelligence™</span>
+      <h2 class="section-title" style="text-align:center;">The intelligent<br><em>pillow of kings</em></h2>
+      <div class="gold-sep"><div class="gold-sep-icon"></div></div>
+      <!-- Mode toggle buttons -->
+      <div id="pillow-modes" style="display:inline-flex;gap:0;border:1px solid rgba(201,169,110,0.2);margin-top:40px;">
+        <button class="pillow-mode-btn active" data-mode="relax" onclick="setPillowMode('relax',this)" style="padding:14px 32px;background:rgba(201,169,110,0.12);border:none;color:var(--gold);font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.4s;">Relax</button>
+        <button class="pillow-mode-btn" data-mode="deepsleep" onclick="setPillowMode('deepsleep',this)" style="padding:14px 32px;background:transparent;border:none;color:var(--muted);font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.4s;">Deep Sleep</button>
+        <button class="pillow-mode-btn" data-mode="neckcare" onclick="setPillowMode('neckcare',this)" style="padding:14px 32px;background:transparent;border:none;color:var(--muted);font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.4s;">Neck Care</button>
+      </div>
+    </div>
+
+    <div class="pillow-grid">
+      <!-- Pillow Visual Panel -->
+      <div class="pillow-visual reveal">
+        <!-- Pillow 3D SVG visualization -->
+        <div id="pillow-viz" style="background:var(--dark-elevated);border:1px solid rgba(201,169,110,0.08);padding:40px;margin-bottom:24px;transition:all 0.8s ease;position:relative;overflow:hidden;">
+          <!-- Animated glow -->
+          <div id="pillow-glow" style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 80%, rgba(201,169,110,0.06) 0%, transparent 70%);pointer-events:none;transition:opacity 0.8s;"></div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <span style="font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted);" id="pillow-mode-label">Tonight's Profile · Relax Mode</span>
+            <span style="width:8px; height:8px; background:#4CAF50; border-radius:50%; display:block; box-shadow: 0 0 8px rgba(76,175,80,0.5);"></span>
+          </div>
+
+          <!-- Pillow SVG illustration -->
+          <div style="text-align:center;margin-bottom:24px;position:relative;">
+            <svg id="pillow-svg" viewBox="0 0 300 140" style="width:100%;max-width:300px;transition:all 0.8s ease;" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="pillowGrad" cx="50%" cy="40%" r="55%">
+                  <stop offset="0%" stop-color="#2E2A20"/>
+                  <stop offset="100%" stop-color="#1A1712"/>
+                </radialGradient>
+                <radialGradient id="pillowSheen" cx="30%" cy="25%" r="50%">
+                  <stop offset="0%" stop-color="rgba(201,169,110,0.15)"/>
+                  <stop offset="100%" stop-color="rgba(201,169,110,0)"/>
+                </radialGradient>
+                <filter id="pillowShadow">
+                  <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="rgba(0,0,0,0.6)"/>
+                </filter>
+              </defs>
+              <!-- Pillow body -->
+              <ellipse cx="150" cy="85" rx="130" ry="42" fill="url(#pillowGrad)" filter="url(#pillowShadow)"/>
+              <ellipse cx="150" cy="75" rx="128" ry="38" fill="url(#pillowGrad)"/>
+              <ellipse cx="150" cy="75" rx="128" ry="38" fill="url(#pillowSheen)"/>
+              <!-- Pillow seam lines -->
+              <ellipse cx="150" cy="75" rx="118" ry="30" fill="none" stroke="rgba(201,169,110,0.12)" stroke-width="1"/>
+              <line x1="150" y1="44" x2="150" y2="106" stroke="rgba(201,169,110,0.1)" stroke-width="1"/>
+              <!-- Sensor dots -->
+              <circle id="ps1" cx="80" cy="75" r="3" fill="rgba(201,169,110,0.4)"/>
+              <circle id="ps2" cx="150" cy="65" r="3" fill="rgba(201,169,110,0.6)"/>
+              <circle id="ps3" cx="220" cy="75" r="3" fill="rgba(201,169,110,0.4)"/>
+              <circle id="ps4" cx="115" cy="82" r="2.5" fill="rgba(201,169,110,0.3)"/>
+              <circle id="ps5" cx="185" cy="68" r="2.5" fill="rgba(201,169,110,0.3)"/>
+              <!-- Zone highlight (changes per mode) -->
+              <ellipse id="pillow-zone" cx="150" cy="72" rx="60" ry="20" fill="rgba(201,169,110,0.06)" stroke="rgba(201,169,110,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+              <!-- HAPI text on pillow -->
+              <text x="150" y="79" text-anchor="middle" font-family="'Cormorant Garamond',serif" font-size="14" fill="rgba(201,169,110,0.3)" letter-spacing="6">HAPI</text>
+            </svg>
+          </div>
+
+          <!-- Mode-reactive metrics -->
+          <div id="pillow-metrics-panel" style="display:flex; flex-direction:column; gap:12px; transition:all 0.6s;">
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="font-size:9px; letter-spacing:2px; color:var(--text-muted);" id="pm-label-1">Cervical Alignment</span>
+                <span style="font-size:9px; color:var(--gold);" id="pm-val-1">Optimal</span>
+              </div>
+              <div style="height:2px; background:rgba(201,169,110,0.1); border-radius:2px;">
+                <div id="pm-bar-1" style="height:100%; background:linear-gradient(to right, var(--gold-dark), var(--gold)); border-radius:2px; transition:width 0.8s ease;width:93%;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="font-size:9px; letter-spacing:2px; color:var(--text-muted);" id="pm-label-2">Temperature Control</span>
+                <span style="font-size:9px; color:var(--gold);" id="pm-val-2">18.5°C</span>
+              </div>
+              <div style="height:2px; background:rgba(201,169,110,0.1); border-radius:2px;">
+                <div id="pm-bar-2" style="height:100%; background:linear-gradient(to right, var(--gold-dark), var(--gold)); border-radius:2px; transition:width 0.8s ease 0.1s;width:78%;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="font-size:9px; letter-spacing:2px; color:var(--text-muted);" id="pm-label-3">REM Phase Enhancement</span>
+                <span style="font-size:9px; color:var(--gold);" id="pm-val-3">Active</span>
+              </div>
+              <div style="height:2px; background:rgba(201,169,110,0.1); border-radius:2px;">
+                <div id="pm-bar-3" style="height:100%; background:linear-gradient(to right, var(--gold-dark), var(--gold)); border-radius:2px; transition:width 0.8s ease 0.2s;width:88%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sleep Quality Index -->
+          <div style="text-align:center; margin-top:28px; padding-top:24px; border-top:1px solid rgba(201,169,110,0.08);">
+            <div style="font-family:'Cormorant Garamond',serif; font-size:48px; font-weight:300; color:var(--gold); line-height:1;" id="pillow-score">96<span style="font-size:18px; color:var(--muted);">%</span></div>
+            <div style="font-size:8px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-top:4px;" id="pillow-score-label">Sleep Quality Index</div>
+          </div>
+        </div>
+
         <div class="sleep-metrics">
           <div class="metric">
-            <span class="metric-value">7.4h</span>
-            <span class="metric-label">Deep Sleep</span>
+            <span class="metric-value" id="pillow-stat-1">7.4h</span>
+            <span class="metric-label" id="pillow-stat-1-label">Deep Sleep</span>
           </div>
           <div class="metric">
-            <span class="metric-value">14°</span>
-            <span class="metric-label">Recline Angle</span>
+            <span class="metric-value" id="pillow-stat-2">14°</span>
+            <span class="metric-label" id="pillow-stat-2-label">Recline Angle</span>
           </div>
           <div class="metric">
             <span class="metric-value">48</span>
@@ -1572,13 +1788,14 @@
         </div>
       </div>
 
+      <!-- Pillow Text Content -->
       <div class="reveal reveal-delay-1">
         <span class="section-label">Wellness Innovation</span>
-        <h2 class="section-title">The intelligent<br><em>pillow of kings</em></h2>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,3vw,40px);font-weight:300;color:var(--cream);line-height:1.2;margin-bottom:16px;" id="pillow-headline">The pillow of<br><em style="font-style:italic;color:var(--gold);">serene repose</em></h3>
         <div class="gold-sep"><div class="gold-sep-icon"></div></div>
-        <p class="section-body" style="margin-bottom: 40px;">The ancient Egyptians believed sleep to be the passage between worlds. HAPI's smart medical pillow system honors this belief with modern science — 48 micro-sensors, adaptive cervical support, and Egyptian kyphi aromatherapy released in precise sleep-phase sequences.</p>
+        <p class="section-body" style="margin-bottom: 40px;" id="pillow-description">The ancient Egyptians believed sleep to be the passage between worlds. In Relax mode, HAPI's pillow envelops you in a gentle embrace — soft lateral support, warm kyphi micro-release, and a subtle 3° recline that melts tension from the first exhale.</p>
 
-        <ul class="pillow-features">
+        <ul class="pillow-features" id="pillow-feature-list">
           <li>AI-adaptive cervical and lumbar contouring</li>
           <li>Phase-reactive kyphi essential oil micro-release</li>
           <li>Non-invasive biometric sleep tracking</li>
@@ -1586,6 +1803,12 @@
           <li>Morning sleep report delivered with breakfast</li>
           <li>Personalized to your profile from night one</li>
         </ul>
+
+        <!-- Mode description cards -->
+        <div style="margin-top:40px;padding:24px;background:var(--dark-elevated);border:1px solid rgba(201,169,110,0.08);border-left:2px solid var(--gold);">
+          <span style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:10px;" id="pillow-mode-tag">RELAX MODE</span>
+          <p style="font-size:12px;letter-spacing:0.5px;color:var(--text-muted);line-height:1.9;" id="pillow-mode-desc">Gentle pressure relief across the cranial and cervical zones. Warm aromatherapy at 28°C skin-surface. Designed for unwinding — the transition from the world outside to the silence within.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -1978,9 +2201,573 @@
   </div>
 </footer>
 
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+// ── BED SPEC TOOLTIPS
+document.querySelectorAll('.bed-spec-row').forEach(row => {
+  row.addEventListener('mouseenter', () => {
+    const detail = row.getAttribute('data-detail');
+    const panel = document.getElementById('bed-spec-detail');
+    document.getElementById('bed-spec-text').textContent = detail;
+    panel.style.opacity = '1';
+  });
+  row.addEventListener('mouseleave', () => {
+    document.getElementById('bed-spec-detail').style.opacity = '0';
+  });
+});
+
+// ── COMFORT BAR ANIMATION (trigger on scroll)
+const comfortObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('.comfort-bar').forEach(bar => {
+        bar.style.width = bar.getAttribute('data-width');
+      });
+      comfortObserver.disconnect();
+    }
+  });
+}, { threshold: 0.3 });
+const comfortSection = document.getElementById('room3d');
+if (comfortSection) comfortObserver.observe(comfortSection);
+
+// ── PILLOW MODE SYSTEM
+const pillowModes = {
+  relax: {
+    headline: 'The pillow of<br><em style="font-style:italic;color:var(--gold);">serene repose</em>',
+    description: 'In Relax mode, HAPI\'s pillow envelops you in a gentle embrace — soft lateral support, warm kyphi micro-release, and a subtle 3° recline that melts tension from the first exhale.',
+    modeTag: 'RELAX MODE',
+    modeDesc: 'Gentle pressure relief across the cranial and cervical zones. Warm aromatherapy at 28°C skin-surface. Designed for unwinding — the transition from the world outside to the silence within.',
+    score: '96', scoreLabel: 'Sleep Quality Index',
+    bars: [{l:'Cervical Alignment', v:'Optimal', w:'93%'},{l:'Temperature Control', v:'18.5°C', w:'78%'},{l:'REM Phase Enhancement', v:'Active', w:'88%'}],
+    stats: ['7.4h', 'Deep Sleep', '14°', 'Recline Angle'],
+    modeLabel: "Tonight's Profile · Relax Mode",
+    glowColor: 'rgba(201,169,110,0.06)',
+    zoneRx: 60, zoneRy: 20
+  },
+  deepsleep: {
+    headline: 'The pillow of<br><em style="font-style:italic;color:var(--gold);">perfect silence</em>',
+    description: 'Deep Sleep mode activates all 48 sensors simultaneously. Spinal alignment is micro-corrected every 22 minutes. Kyphi diffusion intensifies during verified REM entry. The pyramids were built for eternity — your sleep should feel the same.',
+    modeTag: 'DEEP SLEEP MODE',
+    modeDesc: 'Full cervical support protocol engaged. Pressure zones remapped to your body\'s live biometric data. Temperature drops to 17°C. Light and sound micro-dampening fields active around the pillow perimeter.',
+    score: '99', scoreLabel: 'REM Optimization Index',
+    bars: [{l:'Spinal Alignment', v:'Perfect', w:'99%'},{l:'Temperature Control', v:'17.0°C', w:'92%'},{l:'REM Phase Enhancement', v:'Maximized', w:'99%'}],
+    stats: ['9.1h', 'REM Hours', '7°', 'Cervical Angle'],
+    modeLabel: "Active · Deep Sleep Protocol",
+    glowColor: 'rgba(60,100,201,0.08)',
+    zoneRx: 90, zoneRy: 28
+  },
+  neckcare: {
+    headline: 'The pillow of<br><em style="font-style:italic;color:var(--gold);">healed horizons</em>',
+    description: 'Neck Care mode engages our medical-grade cervical relief architecture. Developed with Cairo University\'s orthopedic faculty, the pillow contours in real-time to decompress C1–C7 vertebrae. Ancient relief. Modern science.',
+    modeTag: 'NECK CARE MODE',
+    modeDesc: 'Targeted decompression of the C3–C6 cervical zone. Lateral neck cradles extend 12mm for optimal pressure redistribution. Thermal therapy pulses every 8 minutes. Zero-gravity posture simulation active.',
+    score: '98', scoreLabel: 'Cervical Relief Index',
+    bars: [{l:'C3–C6 Decompression', v:'Active', w:'98%'},{l:'Thermal Therapy', v:'36°C', w:'85%'},{l:'Posture Correction', v:'Engaged', w:'97%'}],
+    stats: ['12mm', 'Cradle Depth', '0°', 'Neutral Spine'],
+    modeLabel: "Therapeutic · Neck Care Active",
+    glowColor: 'rgba(201,150,110,0.1)',
+    zoneRx: 40, zoneRy: 32
+  }
+};
+
+function setPillowMode(mode, btn) {
+  document.querySelectorAll('.pillow-mode-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = 'transparent';
+    b.style.color = 'var(--muted)';
+  });
+  btn.classList.add('active');
+  btn.style.background = 'rgba(201,169,110,0.12)';
+  btn.style.color = 'var(--gold)';
+
+  const m = pillowModes[mode];
+  document.getElementById('pillow-headline').innerHTML = m.headline;
+  document.getElementById('pillow-description').textContent = m.description;
+  document.getElementById('pillow-mode-tag').textContent = m.modeTag;
+  document.getElementById('pillow-mode-desc').textContent = m.modeDesc;
+  document.getElementById('pillow-score').innerHTML = m.score + '<span style="font-size:18px;color:var(--muted);">%</span>';
+  document.getElementById('pillow-score-label').textContent = m.scoreLabel;
+  document.getElementById('pillow-mode-label').textContent = m.modeLabel;
+  document.getElementById('pillow-glow').style.background = `radial-gradient(ellipse at 50% 80%, ${m.glowColor} 0%, transparent 70%)`;
+  document.getElementById('pillow-zone').setAttribute('rx', m.zoneRx);
+  document.getElementById('pillow-zone').setAttribute('ry', m.zoneRy);
+
+  m.bars.forEach((b, i) => {
+    const n = i + 1;
+    document.getElementById(`pm-label-${n}`).textContent = b.l;
+    document.getElementById(`pm-val-${n}`).textContent = b.v;
+    document.getElementById(`pm-bar-${n}`).style.width = '0';
+    setTimeout(() => { document.getElementById(`pm-bar-${n}`).style.width = b.w; }, 50 + i * 100);
+  });
+
+  document.getElementById('pillow-stat-1').textContent = m.stats[0];
+  document.getElementById('pillow-stat-1-label').textContent = m.stats[1];
+  document.getElementById('pillow-stat-2').textContent = m.stats[2];
+  document.getElementById('pillow-stat-2-label').textContent = m.stats[3];
+}
+
+// ── THREE.JS ROOM EXPERIENCE
+let roomScene, roomCamera, roomRenderer, roomAnimId;
+let isDragging = false, prevMouse = {x:0,y:0};
+let spherical = {theta: 0.3, phi: 1.1, radius: 8};
+let targetSpherical = {theta: 0.3, phi: 1.1, radius: 8};
+let autoRotate = true, autoRotateTimeout;
+let bedMesh = null, bedGlowing = false;
+let room3dInitialized = false;
+
+function initRoom3D() {
+  if (room3dInitialized) return;
+  room3dInitialized = true;
+
+  const canvas = document.getElementById('room3d-canvas');
+  const container = document.getElementById('room3d-container');
+  const W = container.clientWidth, H = container.clientHeight;
+
+  roomScene = new THREE.Scene();
+  roomScene.background = new THREE.Color(0x0A0806);
+  roomScene.fog = new THREE.Fog(0x0A0806, 14, 28);
+
+  roomCamera = new THREE.PerspectiveCamera(55, W/H, 0.1, 100);
+  updateCameraPosition();
+
+  roomRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  roomRenderer.setSize(W, H);
+  roomRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  roomRenderer.shadowMap.enabled = true;
+  roomRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  roomRenderer.outputEncoding = THREE.sRGBEncoding;
+  roomRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+  roomRenderer.toneMappingExposure = 0.9;
+
+  buildRoom();
+
+  // Lights
+  const ambient = new THREE.AmbientLight(0xC9A96E, 0.15);
+  roomScene.add(ambient);
+
+  // Warm ceiling light
+  const ceilLight = new THREE.PointLight(0xC9A96E, 1.2, 12);
+  ceilLight.position.set(0, 3.5, 0);
+  ceilLight.castShadow = true;
+  ceilLight.shadow.mapSize.set(512, 512);
+  ceilLight.shadow.radius = 4;
+  roomScene.add(ceilLight);
+
+  // Window light (pyramid view — cool-warm mix)
+  const windowLight = new THREE.DirectionalLight(0xF5E8C0, 0.8);
+  windowLight.position.set(-4, 2, -3);
+  windowLight.castShadow = true;
+  windowLight.shadow.mapSize.set(512, 512);
+  roomScene.add(windowLight);
+
+  // Bedside warmth
+  const bedLight1 = new THREE.PointLight(0xD4A853, 0.7, 5);
+  bedLight1.position.set(-2.2, 1.2, 0.5);
+  roomScene.add(bedLight1);
+  const bedLight2 = new THREE.PointLight(0xD4A853, 0.7, 5);
+  bedLight2.position.set(2.2, 1.2, 0.5);
+  roomScene.add(bedLight2);
+
+  // Reveal scene after brief delay
+  setTimeout(() => {
+    document.getElementById('room3d-loader').style.opacity = '0';
+    setTimeout(() => { document.getElementById('room3d-loader').style.display = 'none'; }, 600);
+    // Cinematic veil fade
+    const veil = document.getElementById('room3d-veil');
+    veil.style.opacity = '0';
+    setTimeout(() => { veil.style.display = 'none'; }, 2000);
+  }, 800);
+
+  // Mouse / touch controls
+  canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    autoRotate = false;
+    prevMouse = {x: e.clientX, y: e.clientY};
+    canvas.style.cursor = 'grabbing';
+    clearTimeout(autoRotateTimeout);
+  });
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+    canvas.style.cursor = 'grab';
+    autoRotateTimeout = setTimeout(() => { autoRotate = true; }, 3000);
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevMouse.x;
+    const dy = e.clientY - prevMouse.y;
+    targetSpherical.theta -= dx * 0.008;
+    targetSpherical.phi = Math.max(0.4, Math.min(1.6, targetSpherical.phi + dy * 0.006));
+    prevMouse = {x: e.clientX, y: e.clientY};
+  });
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    targetSpherical.radius = Math.max(3.5, Math.min(12, targetSpherical.radius + e.deltaY * 0.01));
+  }, {passive: false});
+
+  window.addEventListener('resize', () => {
+    const W2 = container.clientWidth, H2 = container.clientHeight;
+    roomCamera.aspect = W2/H2;
+    roomCamera.updateProjectionMatrix();
+    roomRenderer.setSize(W2, H2);
+  });
+
+  animateRoom();
+}
+
+function buildRoom() {
+  const goldMat = new THREE.MeshStandardMaterial({color: 0xC9A96E, metalness: 0.7, roughness: 0.3});
+  const stoneMat = new THREE.MeshStandardMaterial({color: 0x2A241A, roughness: 0.9, metalness: 0.05});
+  const darkMat = new THREE.MeshStandardMaterial({color: 0x1A1712, roughness: 0.95});
+  const creamMat = new THREE.MeshStandardMaterial({color: 0xF0E8D5, roughness: 0.8});
+  const fabricMat = new THREE.MeshStandardMaterial({color: 0xE8DCB8, roughness: 0.95});
+  const curtainMat = new THREE.MeshStandardMaterial({color: 0x2A2015, roughness: 0.9, side: THREE.DoubleSide});
+  const windowMat = new THREE.MeshStandardMaterial({color: 0xC9D4E8, transparent: true, opacity: 0.15, roughness: 0.1, metalness: 0.5});
+  const mirrorMat = new THREE.MeshStandardMaterial({color: 0x888888, metalness: 0.9, roughness: 0.1});
+
+  // FLOOR — limestone
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), stoneMat);
+  floor.rotation.x = -Math.PI/2;
+  floor.receiveShadow = true;
+  roomScene.add(floor);
+
+  // WALLS
+  const wallBack = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), darkMat);
+  wallBack.position.set(0, 3, -6);
+  wallBack.receiveShadow = true;
+  roomScene.add(wallBack);
+
+  const wallLeft = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), darkMat);
+  wallLeft.rotation.y = Math.PI/2;
+  wallLeft.position.set(-6, 3, 0);
+  wallLeft.receiveShadow = true;
+  roomScene.add(wallLeft);
+
+  const wallRight = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), darkMat);
+  wallRight.rotation.y = -Math.PI/2;
+  wallRight.position.set(6, 3, 0);
+  wallRight.receiveShadow = true;
+  roomScene.add(wallRight);
+
+  // CEILING
+  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), darkMat);
+  ceiling.rotation.x = Math.PI/2;
+  ceiling.position.y = 6;
+  roomScene.add(ceiling);
+
+  // GOLD CEILING BORDER
+  const borderMat = new THREE.MeshStandardMaterial({color: 0xC9A96E, metalness: 0.8, roughness: 0.3});
+  [[0, 6, -5.8, 0],[0, 6, 5.8, 0],[(-5.8), 6, 0, Math.PI/2],[(5.8), 6, 0, Math.PI/2]].forEach(([x,y,z,ry]) => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(12, 0.04, 0.12), borderMat);
+    b.position.set(x, y-0.02, z);
+    b.rotation.y = ry;
+    roomScene.add(b);
+  });
+
+  // ─── PYRAMID VIEW WINDOW (the key visual element)
+  const winGroup = new THREE.Group();
+  winGroup.position.set(-5.9, 2.5, -1);
+
+  // Window frame
+  const frameH = new THREE.Mesh(new THREE.BoxGeometry(0.12, 3.2, 0.08), goldMat);
+  winGroup.add(frameH);
+  const frameL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 3.0), goldMat);
+  frameL.position.y = 1.55;
+  winGroup.add(frameL);
+  const frameB = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 3.0), goldMat);
+  frameB.position.y = -1.55;
+  winGroup.add(frameB);
+
+  // Window glass
+  const glass = new THREE.Mesh(new THREE.BoxGeometry(0.04, 3.0, 2.8), windowMat);
+  glass.position.x = 0.04;
+  winGroup.add(glass);
+
+  // Pyramid silhouettes through window (simple triangular shapes)
+  const pyrMat = new THREE.MeshStandardMaterial({color: 0x8B6914, emissive: 0x4A3000, emissiveIntensity: 0.3});
+  [-0.6, 0.1, 0.8].forEach((z, i) => {
+    const pyr = new THREE.Mesh(
+      new THREE.ConeGeometry(0.3 - i*0.05, 0.8 - i*0.1, 4),
+      pyrMat
+    );
+    pyr.position.set(0.06, -0.6 + i*0.15, z);
+    pyr.rotation.y = Math.PI/4;
+    winGroup.add(pyr);
+  });
+
+  winGroup.rotation.y = Math.PI/2;
+  roomScene.add(winGroup);
+
+  // WINDOW LIGHT HALO
+  const winHalo = new THREE.PointLight(0xFFE8A0, 1.4, 8);
+  winHalo.position.set(-4.5, 2.5, -1);
+  roomScene.add(winHalo);
+
+  // ─── BED (main focus)
+  const bedGroup = new THREE.Group();
+  bedGroup.position.set(0, 0, 1);
+
+  // Bed base (alabaster)
+  const bedBase = new THREE.Mesh(
+    new THREE.BoxGeometry(3.2, 0.45, 2.4),
+    new THREE.MeshStandardMaterial({color: 0x3A3020, roughness: 0.7, metalness: 0.1})
+  );
+  bedBase.position.y = 0.225;
+  bedBase.castShadow = true;
+  bedBase.receiveShadow = true;
+  bedGroup.add(bedBase);
+
+  // Gold trim on base
+  const trimMat = new THREE.MeshStandardMaterial({color: 0xC9A96E, metalness: 0.85, roughness: 0.2});
+  const trim = new THREE.Mesh(new THREE.BoxGeometry(3.25, 0.04, 2.45), trimMat);
+  trim.position.y = 0.47;
+  bedGroup.add(trim);
+
+  // Mattress
+  const mattress = new THREE.Mesh(
+    new THREE.BoxGeometry(3.0, 0.38, 2.2),
+    new THREE.MeshStandardMaterial({color: 0xF0E8D5, roughness: 0.9})
+  );
+  mattress.position.y = 0.64;
+  mattress.castShadow = true;
+  bedGroup.add(mattress);
+
+  // Egyptian linen (top layer)
+  const linen = new THREE.Mesh(
+    new THREE.BoxGeometry(2.95, 0.06, 2.15),
+    fabricMat
+  );
+  linen.position.y = 0.84;
+  bedGroup.add(linen);
+
+  // Duvet / blanket (folded top)
+  const duvet = new THREE.Mesh(
+    new THREE.BoxGeometry(2.9, 0.18, 1.5),
+    new THREE.MeshStandardMaterial({color: 0xD4C8A0, roughness: 0.95})
+  );
+  duvet.position.set(0, 0.94, 0.3);
+  bedGroup.add(duvet);
+
+  // Gold duvet trim
+  const duvetTrim = new THREE.Mesh(new THREE.BoxGeometry(2.91, 0.02, 0.05), trimMat);
+  duvetTrim.position.set(0, 1.04, -0.4);
+  bedGroup.add(duvetTrim);
+
+  // Pillows
+  [-0.85, 0, 0.85].forEach(x => {
+    const pillow = new THREE.Mesh(
+      new THREE.BoxGeometry(0.75, 0.18, 0.55),
+      new THREE.MeshStandardMaterial({color: 0xEDE0C0, roughness: 0.9})
+    );
+    // Slightly rounded look with position offset
+    pillow.position.set(x, 1.06, -0.75);
+    pillow.castShadow = true;
+    bedGroup.add(pillow);
+  });
+
+  // Headboard (ornate)
+  const headboard = new THREE.Mesh(
+    new THREE.BoxGeometry(3.1, 1.8, 0.12),
+    new THREE.MeshStandardMaterial({color: 0x2A2015, roughness: 0.6, metalness: 0.1})
+  );
+  headboard.position.set(0, 1.35, -1.26);
+  headboard.castShadow = true;
+  bedGroup.add(headboard);
+
+  // Headboard gold accent
+  const hbTrim = new THREE.Mesh(new THREE.BoxGeometry(3.12, 0.04, 0.14), trimMat);
+  hbTrim.position.set(0, 2.24, -1.26);
+  bedGroup.add(hbTrim);
+
+  // Headboard center ornament (Egyptian cartouche shape)
+  const cartouche = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.22, 0.22, 0.06, 20),
+    trimMat
+  );
+  cartouche.rotation.x = Math.PI/2;
+  cartouche.position.set(0, 1.6, -1.24);
+  bedGroup.add(cartouche);
+
+  bedMesh = bedGroup;
+  roomScene.add(bedGroup);
+
+  // ─── BEDSIDE TABLES
+  [-2.0, 2.0].forEach(x => {
+    const table = new THREE.Group();
+    const top = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.06, 0.55), stoneMat);
+    top.position.y = 0.72;
+    table.add(top);
+    // Gold trim on table top
+    const tt = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.02, 0.57), trimMat);
+    tt.position.y = 0.76;
+    table.add(tt);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.7, 0.5), darkMat);
+    body.position.y = 0.37;
+    table.add(body);
+    // Lamp base
+    const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 0.12, 12), goldMat);
+    lampBase.position.y = 0.84;
+    table.add(lampBase);
+    const lampPole = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.35, 8), goldMat);
+    lampPole.position.y = 1.09;
+    table.add(lampPole);
+    const lampShade = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.28, 12, 1, true), new THREE.MeshStandardMaterial({color: 0xD4B060, roughness: 0.7, side: THREE.DoubleSide, transparent: true, opacity: 0.9}));
+    lampShade.position.y = 1.35;
+    lampShade.rotation.x = Math.PI;
+    table.add(lampShade);
+    table.position.set(x, 0, 0.5);
+    roomScene.add(table);
+  });
+
+  // ─── CURTAINS
+  [-1.1, -0.55, 0, 0.55, 1.1].forEach((z, i) => {
+    const curtain = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.5, 5.5),
+      new THREE.MeshStandardMaterial({color: i%2===0 ? 0x1A1508 : 0x221C0A, roughness: 0.95, side: THREE.DoubleSide})
+    );
+    curtain.position.set(-5.7, 2.8, z - 0.8);
+    curtain.rotation.y = Math.PI/2 + (i%2===0 ? 0.08 : -0.08);
+    curtain.castShadow = true;
+    roomScene.add(curtain);
+  });
+
+  // Gold curtain rod
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 3.5, 8), trimMat);
+  rod.rotation.z = Math.PI/2;
+  rod.position.set(-5.7, 5.3, -0.8);
+  roomScene.add(rod);
+
+  // ─── RUG
+  const rug = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.8, 5),
+    new THREE.MeshStandardMaterial({color: 0x3A1E0A, roughness: 0.98})
+  );
+  rug.rotation.x = -Math.PI/2;
+  rug.position.set(0, 0.005, 1);
+  roomScene.add(rug);
+
+  // Rug gold border
+  const rugBorder = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.82, 5.02),
+    new THREE.MeshStandardMaterial({color: 0xC9A96E, roughness: 0.8, metalness: 0.2, wireframe: false})
+  );
+  rugBorder.rotation.x = -Math.PI/2;
+  rugBorder.position.set(0, 0.002, 1);
+  roomScene.add(rugBorder);
+
+  // ─── FLOOR DETAILS (limestone tiles implied via subtle geometry)
+  for(let x=-5;x<=5;x+=2) {
+    for(let z=-5;z<=5;z+=2) {
+      const tile = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.95, 1.95),
+        new THREE.MeshStandardMaterial({color: x%4===0 ? 0x252015 : 0x2A251A, roughness: 0.92})
+      );
+      tile.rotation.x = -Math.PI/2;
+      tile.position.set(x, 0.001, z);
+      roomScene.add(tile);
+    }
+  }
+
+  // ─── WALL ART (hieroglyphic panel)
+  const artPanel = new THREE.Mesh(
+    new THREE.BoxGeometry(1.8, 1.0, 0.04),
+    new THREE.MeshStandardMaterial({color: 0x2E1A00, roughness: 0.8})
+  );
+  artPanel.position.set(3.5, 2.5, -5.97);
+  roomScene.add(artPanel);
+  const artFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(1.86, 1.06, 0.03),
+    trimMat
+  );
+  artFrame.position.set(3.5, 2.5, -5.96);
+  roomScene.add(artFrame);
+
+  // ─── CEILING PENDANT LIGHT
+  const pendantStem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.8, 8), mirrorMat);
+  pendantStem.position.set(0, 5.6, 0);
+  roomScene.add(pendantStem);
+  const pendantBase = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), goldMat);
+  pendantBase.position.set(0, 5.1, 0);
+  roomScene.add(pendantBase);
+}
+
+function updateCameraPosition() {
+  const {theta, phi, radius} = spherical;
+  const lookTarget = new THREE.Vector3(0, 1.2, 0.5);
+  roomCamera.position.set(
+    lookTarget.x + radius * Math.sin(phi) * Math.sin(theta),
+    lookTarget.y + radius * Math.cos(phi),
+    lookTarget.z + radius * Math.sin(phi) * Math.cos(theta)
+  );
+  roomCamera.lookAt(lookTarget);
+}
+
+function focusBedIn3D() {
+  targetSpherical.theta = 0.2;
+  targetSpherical.phi = 1.3;
+  targetSpherical.radius = 4.5;
+  autoRotate = false;
+  bedGlowing = true;
+  // Scroll to 3D section
+  document.getElementById('room3d').scrollIntoView({behavior:'smooth'});
+  setTimeout(() => { bedGlowing = false; autoRotate = true; }, 4000);
+}
+
+function animateRoom() {
+  roomAnimId = requestAnimationFrame(animateRoom);
+
+  // Auto-rotate
+  if (autoRotate) {
+    targetSpherical.theta += 0.0015;
+  }
+
+  // Smooth interpolation
+  spherical.theta += (targetSpherical.theta - spherical.theta) * 0.06;
+  spherical.phi += (targetSpherical.phi - spherical.phi) * 0.06;
+  spherical.radius += (targetSpherical.radius - spherical.radius) * 0.06;
+
+  updateCameraPosition();
+
+  // Bed glow pulse
+  if (bedMesh && bedGlowing) {
+    const t = Date.now() * 0.003;
+    bedMesh.children.forEach(child => {
+      if (child.material && child.material.emissive) {
+        child.material.emissive = new THREE.Color(0.3 + 0.15 * Math.sin(t), 0.2 + 0.1 * Math.sin(t), 0);
+        child.material.emissiveIntensity = 0.3 + 0.2 * Math.sin(t);
+      }
+    });
+  } else if (bedMesh) {
+    bedMesh.children.forEach(child => {
+      if (child.material && child.material.emissiveIntensity) {
+        child.material.emissiveIntensity = 0;
+      }
+    });
+  }
+
+  roomRenderer.render(roomScene, roomCamera);
+}
+
+// ── Lazy-init 3D room when section becomes visible
+const room3dObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      initRoom3D();
+      // Hide hint after 5s
+      setTimeout(() => {
+        const hint = document.getElementById('room3d-hint');
+        if (hint) hint.style.opacity = '0';
+      }, 5000);
+      room3dObserver.disconnect();
+    }
+  });
+}, { threshold: 0.1 });
+const r3dSection = document.getElementById('room3d-container');
+if (r3dSection) room3dObserver.observe(r3dSection);
+</script>
 <script>
 // ── Cursor
-const cursor = document.getElementById('cursor');
 const ring = document.getElementById('cursorRing');
 let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
 
