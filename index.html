@@ -255,6 +255,139 @@
   }
 
   /* Section styles */
+  @keyframes orbSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .pillow-q-btn {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--dark-elevated);
+    border: 1px solid rgba(201,169,110,0.1);
+    color: var(--muted);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.3s ease;
+  }
+  .pillow-q-btn:hover {
+    border-color: rgba(201,169,110,0.3);
+    color: var(--text-light);
+    background: rgba(201,169,110,0.05);
+  }
+  .pillow-q-btn.selected {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(201,169,110,0.1);
+  }
+
+  .pillow-card {
+    border: 1px solid rgba(201,169,110,0.1);
+    background: var(--dark-elevated);
+    padding: 24px 20px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .pillow-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(201,169,110,0.08) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .pillow-card:hover { border-color: rgba(201,169,110,0.35); transform: translateY(-2px); }
+  .pillow-card:hover::before { opacity: 1; }
+  .pillow-card.recommended {
+    border-color: var(--gold);
+    background: rgba(201,169,110,0.06);
+  }
+  .pillow-card.recommended::before { opacity: 1; }
+  .pillow-card.selected-card {
+    border-color: var(--gold);
+    box-shadow: 0 0 24px rgba(201,169,110,0.18), inset 0 0 24px rgba(201,169,110,0.04);
+  }
+  .pillow-card-tag {
+    font-size: 7px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .pillow-card-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--cream);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .pillow-card-material {
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+  .pillow-card-desc {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+  .pillow-card-special {
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 6px 10px;
+    border: 1px solid rgba(201,169,110,0.12);
+    display: inline-block;
+    margin-bottom: 14px;
+  }
+  .pillow-card-select-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid rgba(201,169,110,0.2);
+    color: var(--muted);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .pillow-card-select-btn:hover, .selected-card .pillow-card-select-btn {
+    background: rgba(201,169,110,0.12);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .pillow-selected-checkmark {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 20px; height: 20px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--obsidian);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .selected-card .pillow-selected-checkmark { opacity: 1; }
+
   @keyframes loaderSlide {
     0% { left: -100%; }
     50% { left: 0%; }
@@ -1840,13 +1973,20 @@
       <div class="step-item" id="step-indicator-3">
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
           <div class="step-circle">03</div>
-          <span class="step-label" style="position:static;transform:none;">Guest Details</span>
+          <span class="step-label" style="position:static;transform:none;">Your Pillow</span>
         </div>
       </div>
       <div class="step-line"></div>
       <div class="step-item" id="step-indicator-4">
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
           <div class="step-circle">04</div>
+          <span class="step-label" style="position:static;transform:none;">Guest Details</span>
+        </div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item" id="step-indicator-5">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div class="step-circle">05</div>
           <span class="step-label" style="position:static;transform:none;">Confirm</span>
         </div>
       </div>
@@ -1931,12 +2071,99 @@
         </div>
         <div class="form-actions">
           <button class="btn-outline" onclick="nextStep(1)">← Back</button>
-          <button class="btn-gold" onclick="nextStep(3)">Continue →</button>
+          <button class="btn-gold" onclick="nextStep(3)">Continue to Pillow Selection →</button>
         </div>
       </div>
 
-      <!-- Step 3: Guest Details -->
+      <!-- Step 3: Pillow Selection -->
       <div class="booking-step-content" id="step-3">
+
+        <!-- Sleep Profile Questionnaire -->
+        <div id="pillow-questionnaire">
+          <p style="font-size:11px;letter-spacing:2px;color:var(--text-light);margin-bottom:36px;line-height:2;">HAPI's Sleep Intelligence™ will match you with the ideal pillow for your body and sleep style. Answer three questions — your pillow will be waiting in your suite.</p>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:32px;" id="pillow-q-grid">
+
+            <!-- Q1: Sleep Position -->
+            <div>
+              <label style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:16px;">Sleep Position</label>
+              <div style="display:flex;flex-direction:column;gap:8px;" id="q-position">
+                <button class="pillow-q-btn" data-q="position" data-val="side-left" onclick="selectPillowQ(this)">↙ Left Side</button>
+                <button class="pillow-q-btn" data-q="position" data-val="side-right" onclick="selectPillowQ(this)">↘ Right Side</button>
+                <button class="pillow-q-btn" data-q="position" data-val="back" onclick="selectPillowQ(this)">↑ Back Sleeper</button>
+                <button class="pillow-q-btn" data-q="position" data-val="stomach" onclick="selectPillowQ(this)">↓ Stomach Sleeper</button>
+                <button class="pillow-q-btn" data-q="position" data-val="mixed" onclick="selectPillowQ(this)">⟳ Mixed Sleeper</button>
+              </div>
+            </div>
+
+            <!-- Q2: Body Type -->
+            <div>
+              <label style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:16px;">Build & Height</label>
+              <div style="display:flex;flex-direction:column;gap:8px;" id="q-body">
+                <button class="pillow-q-btn" data-q="body" data-val="short" onclick="selectPillowQ(this)">Petite / Short</button>
+                <button class="pillow-q-btn" data-q="body" data-val="average" onclick="selectPillowQ(this)">Average Build</button>
+                <button class="pillow-q-btn" data-q="body" data-val="tall" onclick="selectPillowQ(this)">Tall / Broad</button>
+              </div>
+            </div>
+
+            <!-- Q3: Neck Support -->
+            <div>
+              <label style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:16px;">Neck Support Need</label>
+              <div style="display:flex;flex-direction:column;gap:8px;" id="q-neck">
+                <button class="pillow-q-btn" data-q="neck" data-val="light" onclick="selectPillowQ(this)">Light Support</button>
+                <button class="pillow-q-btn" data-q="neck" data-val="medium" onclick="selectPillowQ(this)">Medium Support</button>
+                <button class="pillow-q-btn" data-q="neck" data-val="strong" onclick="selectPillowQ(this)">Strong / Medical</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Analyze Button -->
+          <button class="btn-gold" id="pillow-analyze-btn" onclick="analyzePillowProfile()" style="opacity:0.4;pointer-events:none;margin-bottom:40px;">
+            <span id="analyze-btn-text">✦ Analyze My Sleep Profile</span>
+          </button>
+        </div>
+
+        <!-- AI Analysis Loading State -->
+        <div id="pillow-analyzing" style="display:none;text-align:center;padding:48px 0;">
+          <div style="margin-bottom:24px;">
+            <div id="ai-orb" style="width:64px;height:64px;border-radius:50%;border:1px solid rgba(201,169,110,0.3);margin:0 auto;position:relative;overflow:hidden;">
+              <div style="position:absolute;inset:0;background:conic-gradient(from 0deg, transparent 70%, var(--gold));animation:orbSpin 1.2s linear infinite;border-radius:50%;"></div>
+              <div style="position:absolute;inset:4px;background:var(--dark);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                <span style="color:var(--gold);font-size:18px;">✦</span>
+              </div>
+            </div>
+          </div>
+          <div id="ai-status-text" style="font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);">Analyzing sleep profile…</div>
+        </div>
+
+        <!-- Recommended Pillow Banner -->
+        <div id="pillow-recommendation" style="display:none;margin-bottom:40px;">
+          <div style="background:linear-gradient(135deg, rgba(201,169,110,0.08) 0%, rgba(201,169,110,0.03) 100%);border:1px solid rgba(201,169,110,0.25);padding:28px 32px;margin-bottom:32px;position:relative;">
+            <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);"></div>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <span style="font-size:8px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);white-space:nowrap;">✦ HAPI AI Recommends</span>
+              <span style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--cream);" id="rec-pillow-name">—</span>
+              <span style="font-size:8px;letter-spacing:2px;color:var(--muted);" id="rec-pillow-reason"></span>
+            </div>
+          </div>
+
+          <!-- All Pillow Cards -->
+          <div id="pillow-cards-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:32px;"></div>
+
+          <div class="form-actions">
+            <button class="btn-outline" onclick="nextStep(2)">← Back</button>
+            <button class="btn-gold" id="pillow-continue-btn" onclick="confirmPillowAndContinue()" style="opacity:0.4;pointer-events:none;">Continue with Selected Pillow →</button>
+          </div>
+        </div>
+
+        <!-- Back button before analysis -->
+        <div id="pillow-pre-nav" style="margin-top:8px;">
+          <button class="btn-outline" onclick="nextStep(2)">← Back</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Guest Details (was step 3) -->
+      <div class="booking-step-content" id="step-4">
         <div class="form-row">
           <div class="form-group">
             <label>Title</label>
@@ -1970,13 +2197,13 @@
           </div>
         </div>
         <div class="form-actions">
-          <button class="btn-outline" onclick="nextStep(2)">← Back</button>
-          <button class="btn-gold" onclick="nextStep(4)">Review Reservation →</button>
+          <button class="btn-outline" onclick="nextStep(3)">← Back</button>
+          <button class="btn-gold" onclick="nextStep(5)">Review Reservation →</button>
         </div>
       </div>
 
-      <!-- Step 4: Confirm -->
-      <div class="booking-step-content" id="step-4">
+      <!-- Step 5: Confirm (was step 4) -->
+      <div class="booking-step-content" id="step-5">
         <div style="border: 1px solid rgba(201,169,110,0.12); padding:40px; margin-bottom:32px;">
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px;">
             <div>
@@ -1992,6 +2219,11 @@
               <span style="font-size:13px; letter-spacing:1px; color:var(--text-light);">Nile Spa Journey</span>
             </div>
             <div>
+              <span style="font-size:7px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:8px;">Sleep Pillow</span>
+              <span style="font-size:13px; letter-spacing:1px; color:var(--text-light);" id="summary-pillow-name">Not selected</span>
+              <span style="font-size:9px;color:var(--muted);display:block;margin-top:4px;" id="summary-pillow-subtitle"></span>
+            </div>
+            <div style="grid-column:1/-1;border-top:1px solid rgba(201,169,110,0.08);padding-top:24px;">
               <span style="font-size:7px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:8px;">Total Estimate</span>
               <span style="font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--gold);">EGP 197,500</span>
             </div>
@@ -1999,7 +2231,7 @@
         </div>
         <p style="font-size:9px; letter-spacing:2px; color:var(--muted); line-height:2.2; margin-bottom:32px;">A personal concierge will contact you within 2 hours to confirm availability and arrange payment. No amount is charged at this stage. All HAPI reservations are fully refundable up to 14 days before arrival.</p>
         <div class="form-actions">
-          <button class="btn-outline" onclick="nextStep(3)">← Back</button>
+          <button class="btn-outline" onclick="nextStep(4)">← Back</button>
           <button class="btn-gold" onclick="submitBooking()">Complete Reservation</button>
         </div>
       </div>
@@ -2308,7 +2540,208 @@ function setPillowMode(mode, btn) {
   document.getElementById('pillow-stat-2-label').textContent = m.stats[3];
 }
 
-// ── THREE.JS ROOM EXPERIENCE
+// ── SMART PILLOW SELECTION SYSTEM
+const PILLOWS = [
+  {
+    id: 'nile-cloud',
+    name: 'Nile Cloud Pillow',
+    tag: 'Side Sleeper Favourite',
+    material: 'Egyptian Cloud Foam™',
+    special: 'Cooling Gel Adaptive Layer',
+    support: 'Medium-Soft Ergonomic',
+    desc: 'Sculpted for side sleepers, the Nile Cloud cradles the cervical curve with graduated lateral elevation. As you turn through the night, its adaptive contour moves with you — like sleeping on a breath of Nile air.',
+    benefit: 'Spine alignment for side sleeping',
+    forPositions: ['side-left','side-right'],
+    forBodies: ['average'],
+    forNeck: ['light','medium'],
+    matchScore: { 'side-left': 10, 'side-right': 10, 'back': 2, 'stomach': 1, 'mixed': 5, 'short': 4, 'average': 10, 'tall': 3, 'light': 8, 'medium': 10, 'strong': 2 }
+  },
+  {
+    id: 'pharaoh-spine',
+    name: 'Pharaoh Spine Align',
+    tag: 'Back Sleeper · Tall Build',
+    material: 'Royal Orthopedic Core™',
+    special: 'Pressure Relief Zones',
+    support: 'Firm Orthopedic Structure',
+    desc: 'Engineered for the back sleeper\'s full spinal column. Seven discrete pressure-relief zones follow the natural curvature of the neck and skull. For tall guests, an extended cervical ledge ensures complete C1–C7 support.',
+    benefit: 'Neck & spine correction support',
+    forPositions: ['back'],
+    forBodies: ['tall'],
+    forNeck: ['medium','strong'],
+    matchScore: { 'side-left': 2, 'side-right': 2, 'back': 10, 'stomach': 1, 'mixed': 4, 'short': 2, 'average': 6, 'tall': 10, 'light': 2, 'medium': 7, 'strong': 10 }
+  },
+  {
+    id: 'desert-float',
+    name: 'Desert Float Pillow',
+    tag: 'Stomach Sleeper · Petite Build',
+    material: 'AirFlex Memory Silk™',
+    special: 'Breathable Cooling Fabric',
+    support: 'Ultra-Soft Low-Height',
+    desc: 'The Desert Float sits only 4.5 cm at its apex — the lowest profile in the HAPI collection. Crafted for stomach sleepers to eliminate neck rotation strain. Its AirFlex Silk surface breathes continuously through the night.',
+    benefit: 'Reduces neck strain for stomach sleepers',
+    forPositions: ['stomach'],
+    forBodies: ['short'],
+    forNeck: ['light'],
+    matchScore: { 'side-left': 2, 'side-right': 2, 'back': 1, 'stomach': 10, 'mixed': 4, 'short': 10, 'average': 5, 'tall': 1, 'light': 10, 'medium': 4, 'strong': 1 }
+  },
+  {
+    id: 'lux-balance',
+    name: 'Lux Nile Balance',
+    tag: 'Mixed Sleeper · Universal',
+    material: 'Smart Adaptive Foam™',
+    special: 'Auto-Adjust Micro Support',
+    desc: 'For guests who move through the night — side, back, stomach — the Lux Nile Balance responds in real time. 96 micro-support cells redistribute independently within 0.3 seconds of position change.',
+    benefit: 'Adaptive shape memory for all positions',
+    forPositions: ['mixed'],
+    forBodies: ['average','short','tall'],
+    forNeck: ['light','medium'],
+    matchScore: { 'side-left': 6, 'side-right': 6, 'back': 6, 'stomach': 5, 'mixed': 10, 'short': 8, 'average': 8, 'tall': 7, 'light': 8, 'medium': 10, 'strong': 4 }
+  },
+  {
+    id: 'royal-recovery',
+    name: 'Royal Recovery Pillow',
+    tag: 'Medical Grade · Neck Pain',
+    material: 'Medical Grade Recovery Gel™',
+    special: 'Sleep Posture Correction System',
+    support: 'Strong Orthopedic Support',
+    desc: 'Developed with Cairo University\'s orthopedic faculty. The Royal Recovery applies measured therapeutic traction to the cervical spine throughout the night — releasing chronic tension with the same gentleness as a skilled therapist\'s hands.',
+    benefit: 'Therapeutic recovery for neck pain',
+    forPositions: ['back','side-left','side-right'],
+    forBodies: ['average','tall'],
+    forNeck: ['strong'],
+    matchScore: { 'side-left': 7, 'side-right': 7, 'back': 8, 'stomach': 2, 'mixed': 5, 'short': 4, 'average': 8, 'tall': 8, 'light': 1, 'medium': 4, 'strong': 10 }
+  }
+];
+
+let pillowAnswers = { position: null, body: null, neck: null };
+let selectedPillowId = null;
+
+function selectPillowQ(btn) {
+  const q = btn.getAttribute('data-q');
+  const val = btn.getAttribute('data-val');
+  // Deselect others in same group
+  document.querySelectorAll(`.pillow-q-btn[data-q="${q}"]`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  pillowAnswers[q] = val;
+
+  // Enable analyze button when all 3 answered
+  const allAnswered = pillowAnswers.position && pillowAnswers.body && pillowAnswers.neck;
+  const btn2 = document.getElementById('pillow-analyze-btn');
+  if (allAnswered) {
+    btn2.style.opacity = '1';
+    btn2.style.pointerEvents = 'auto';
+  }
+}
+
+const aiStatusMessages = [
+  'Analyzing sleep profile…',
+  'Mapping cervical support needs…',
+  'Cross-referencing body biometrics…',
+  'Consulting sleep intelligence database…',
+  'Identifying optimal pillow match…',
+  'Preparing your recommendation…'
+];
+
+function analyzePillowProfile() {
+  // Hide questionnaire, show loader
+  document.getElementById('pillow-questionnaire').style.display = 'none';
+  document.getElementById('pillow-pre-nav').style.display = 'none';
+  document.getElementById('pillow-analyzing').style.display = 'block';
+
+  let msgIdx = 0;
+  const statusEl = document.getElementById('ai-status-text');
+  const interval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % aiStatusMessages.length;
+    statusEl.style.opacity = '0';
+    setTimeout(() => {
+      statusEl.textContent = aiStatusMessages[msgIdx];
+      statusEl.style.opacity = '1';
+    }, 200);
+  }, 700);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    document.getElementById('pillow-analyzing').style.display = 'none';
+    showPillowRecommendation();
+  }, 3800);
+}
+
+function computePillowScores() {
+  return PILLOWS.map(p => {
+    const score = (p.matchScore[pillowAnswers.position] || 0)
+                + (p.matchScore[pillowAnswers.body] || 0)
+                + (p.matchScore[pillowAnswers.neck] || 0);
+    return { ...p, score };
+  }).sort((a, b) => b.score - a.score);
+}
+
+function showPillowRecommendation() {
+  const ranked = computePillowScores();
+  const best = ranked[0];
+
+  document.getElementById('rec-pillow-name').textContent = best.name;
+  document.getElementById('rec-pillow-reason').textContent =
+    `Matched to your ${pillowAnswers.position?.replace('-', ' ')} position · ${pillowAnswers.body} build · ${pillowAnswers.neck} neck support`;
+
+  // Build pillow cards
+  const grid = document.getElementById('pillow-cards-grid');
+  grid.innerHTML = '';
+  ranked.forEach((p, i) => {
+    const isRec = i === 0;
+    const card = document.createElement('div');
+    card.className = 'pillow-card' + (isRec ? ' recommended' : '');
+    card.id = 'pcard-' + p.id;
+    card.innerHTML = `
+      <div class="pillow-selected-checkmark">✓</div>
+      ${isRec ? '<span class="pillow-card-tag">✦ Recommended for You</span>' : '<span class="pillow-card-tag" style="color:var(--muted);">Available Pillow</span>'}
+      <div class="pillow-card-name">${p.name}</div>
+      <div class="pillow-card-material">${p.material}</div>
+      <p class="pillow-card-desc">${p.desc}</p>
+      <div class="pillow-card-special">${p.special}</div>
+      <div style="font-size:8px;letter-spacing:1px;color:var(--muted);margin-bottom:16px;">Support: ${p.support || p.support || 'Adaptive'}</div>
+      <button class="pillow-card-select-btn" onclick="selectPillowCard('${p.id}','${p.name}','${p.tag}')">
+        ${isRec ? '✦ Select Recommended Pillow' : 'Select This Pillow'}
+      </button>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Auto-select recommended
+  selectPillowCard(best.id, best.name, best.tag);
+
+  document.getElementById('pillow-recommendation').style.display = 'block';
+  // Smooth scroll to recommendation
+  setTimeout(() => {
+    document.getElementById('pillow-recommendation').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+
+function selectPillowCard(id, name, tag) {
+  selectedPillowId = id;
+  // Remove selection from all
+  document.querySelectorAll('.pillow-card').forEach(c => c.classList.remove('selected-card'));
+  const target = document.getElementById('pcard-' + id);
+  if (target) target.classList.add('selected-card');
+
+  // Enable continue
+  const cont = document.getElementById('pillow-continue-btn');
+  cont.style.opacity = '1';
+  cont.style.pointerEvents = 'auto';
+
+  // Store for summary
+  window._selectedPillowName = name;
+  window._selectedPillowTag = tag;
+}
+
+function confirmPillowAndContinue() {
+  // Update reservation summary
+  const nameEl = document.getElementById('summary-pillow-name');
+  const subEl = document.getElementById('summary-pillow-subtitle');
+  if (nameEl) nameEl.textContent = window._selectedPillowName || '—';
+  if (subEl) subEl.textContent = window._selectedPillowTag ? `Matched: ${window._selectedPillowTag}` : '';
+  nextStep(4);
+}
+
 let roomScene, roomCamera, roomRenderer, roomAnimId;
 let isDragging = false, prevMouse = {x:0,y:0};
 let spherical = {theta: 0.3, phi: 1.1, radius: 8};
@@ -2814,24 +3247,31 @@ const observer = new IntersectionObserver(entries => {
 }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
 revealEls.forEach(el => observer.observe(el));
 
-// ── Booking steps
+// ── Booking steps (now 5)
 let currentStep = 1;
 
 function nextStep(step) {
-  document.getElementById('step-' + currentStep).classList.remove('active');
+  // Hide current step
+  const cur = document.getElementById('step-' + currentStep);
+  if (cur) cur.classList.remove('active');
+
+  // Update all indicators
   const indicators = document.querySelectorAll('[id^="step-indicator-"]');
   indicators.forEach((ind, i) => {
     ind.classList.remove('active', 'done');
     if (i + 1 < step) ind.classList.add('done');
     else if (i + 1 === step) ind.classList.add('active');
   });
+
   currentStep = step;
-  document.getElementById('step-' + step).classList.add('active');
+  const next = document.getElementById('step-' + step);
+  if (next) next.classList.add('active');
   document.getElementById('booking').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function submitBooking() {
-  document.getElementById('step-4').classList.remove('active');
+  const cur = document.getElementById('step-' + currentStep);
+  if (cur) cur.classList.remove('active');
   document.getElementById('booking-confirm').classList.add('active');
   document.querySelectorAll('[id^="step-indicator-"]').forEach(ind => {
     ind.classList.remove('active');
